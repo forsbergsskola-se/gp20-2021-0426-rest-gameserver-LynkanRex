@@ -106,10 +106,10 @@ namespace TinyBrowser
                                 }
                             }
                         }
-                        else
-                        {
-                            Console.Write("Incorrect entry, please give a number or \"Exit\" and press Return");
-                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Incorrect entry, please give a number or \"Exit\" and press Return");
                     }
                 }
             }
