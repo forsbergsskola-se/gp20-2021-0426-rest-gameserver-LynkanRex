@@ -73,7 +73,7 @@ namespace TinyBrowser
                             
                             Console.WriteLine($"Attempting to connect to {host}{path}");
                             
-                            tcpClient.Close();
+                            tcpClient.Close(); 
                             tcpClient = new TcpClient();
                             tcpClient.Connect(host, 80);
                             
