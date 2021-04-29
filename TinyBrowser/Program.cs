@@ -47,13 +47,12 @@ namespace TinyBrowser
 
             bool activeSession = true;
             
-            while (true)
+            while (activeSession)
             {
                 Console.WriteLine("Make a selection, or enter 'Exit' to close");
                 
                 var choice = Console.ReadLine();
-                var convertedChoice = Convert.ToInt32(choice);
-            
+                
                 if (choice == "Exit")
                 {
                     Console.WriteLine("Closing connection!");
@@ -64,45 +63,53 @@ namespace TinyBrowser
                 }
                 else
                 {
-                    if (Convert.ToInt32(choice) >= 0)
-                    {
-                        string result = "";
-                        if(linksList.TryGetValue(convertedChoice, out result))
-                        {
-                            path = "/"+result;
-                            
-                            Console.WriteLine($"Attempting to connect to {host}{path}");
-                            
-                            tcpClient.Close(); 
-                            tcpClient = new TcpClient();
-                            tcpClient.Connect(host, 80);
-                            
-                            
-                            writer = new StreamWriter(tcpClient.GetStream());
-                            reader = new StreamReader(tcpClient.GetStream());
-                            
-                            CompileWriterRequest(writer, path);
-                            
-                            string newResponse = reader.ReadToEnd();
-                            
-                            Console.Write(newResponse);
-                            int newFirst = newResponse.IndexOf("<body>");
-                            int newLast = newResponse.IndexOf("</body>");
-                            
-                            Console.WriteLine(newFirst);
-                            Console.WriteLine(newLast);
-                            
-                            string newBodySubstring = newResponse.Substring(newFirst+1, newLast - newFirst);
-            
-                            Dictionary<int, string> newLinksList = LinkExtractor.Extract(newBodySubstring);
+                    int number = 0;
+                    var convertedChoiceIsNumber = Int32.TryParse(choice, out number);
 
-                            foreach (var link in newLinksList)
+                    if (convertedChoiceIsNumber)
+                    {
+                        if (number >= 0)
+                        {
+                            string result = "";
+                            if(linksList.TryGetValue(number, out result))
                             {
-                                Console.WriteLine(link);
+                                path = "/"+result;
+                            
+                                Console.WriteLine($"Attempting to connect to {host}{path}");
+                            
+                                tcpClient.Close(); 
+                                tcpClient = new TcpClient();
+                                tcpClient.Connect(host, 80);
+                            
+                            
+                                writer = new StreamWriter(tcpClient.GetStream());
+                                reader = new StreamReader(tcpClient.GetStream());
+                            
+                                CompileWriterRequest(writer, path);
+                            
+                                string newResponse = reader.ReadToEnd();
+                            
+                                Console.Write(newResponse);
+                                int newFirst = newResponse.IndexOf("<body>");
+                                int newLast = newResponse.IndexOf("</body>");
+                            
+                                Console.WriteLine(newFirst);
+                                Console.WriteLine(newLast);
+                            
+                                string newBodySubstring = newResponse.Substring(newFirst+1, newLast - newFirst);
+            
+                                Dictionary<int, string> newLinksList = LinkExtractor.Extract(newBodySubstring);
+
+                                foreach (var link in newLinksList)
+                                {
+                                    Console.WriteLine(link);
+                                }
                             }
-                            return;
                         }
-                        Console.Write("Incorrect entry, please give a number and press Return");
+                        else
+                        {
+                            Console.Write("Incorrect entry, please give a number or \"Exit\" and press Return");
+                        }
                     }
                 }
             }
