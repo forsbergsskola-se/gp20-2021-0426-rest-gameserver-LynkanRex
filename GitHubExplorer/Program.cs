@@ -57,7 +57,7 @@ namespace GitHubExplorer
                 Console.WriteLine("Welcome to the GitHub explorer. Please enter a username that you would like to have a look at:");
                 var username = Console.ReadLine();
                 
-                Console.WriteLine($"Attemtping to access {HttpClient.BaseAddress}users/{username}");
+                Console.WriteLine($"Attempting to access {HttpClient.BaseAddress}users/{username}");
                 
                 HttpResponseMessage response = await HttpClient.GetAsync($"users/{username}");
 
