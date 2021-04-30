@@ -14,6 +14,9 @@ namespace TinyBrowser
         private static TcpClient tcpClient;
         private static Stream stream;
 
+        private static StreamWriter writer;
+        private static StreamReader reader;
+
         private static string host = "acme.com";
         private static string originPath = "/";
         
@@ -24,21 +27,23 @@ namespace TinyBrowser
             tcpClient.SendTimeout = 3000;
             tcpClient.ReceiveTimeout = 3000;
             
-            StreamWriter writer = new StreamWriter(tcpClient.GetStream());
-            StreamReader reader = new StreamReader(tcpClient.GetStream());
+            writer = new StreamWriter(tcpClient.GetStream());
+            reader = new StreamReader(tcpClient.GetStream());
             
             string path = originPath;
             
             CompileWriterRequest(writer, path);
 
             string response = reader.ReadToEnd();
+
+            var websiteURI = new UriBuilder(null, host);
+            var pageTitle = ExtractTagFromWebPage(response, "<title>", "</title>");
+            var bodyTag = ExtractTagFromWebPage(response, "body", "</body>");
             
-            int first = response.IndexOf("<body>");
-            int last = response.IndexOf("</body>");
-            
-            string bodySubstring = response.Substring(first, last - first);
-            
-            Dictionary<int, string> linksList = LinkExtractor.Extract(bodySubstring);
+            Console.WriteLine($"Connected to {websiteURI}");
+            Console.WriteLine($"Page: {pageTitle}");
+
+            Dictionary<int, string> linksList = LinkExtractor.Extract(bodyTag);
 
             foreach (var link in linksList)
             {
@@ -53,7 +58,7 @@ namespace TinyBrowser
                 
                 var choice = Console.ReadLine();
                 
-                if (choice == "Exit")
+                if (choice.ToLower() == "exit")
                 {
                     Console.WriteLine("Closing connection!");
                     writer.Close();
@@ -80,25 +85,21 @@ namespace TinyBrowser
                                 tcpClient.Close(); 
                                 tcpClient = new TcpClient();
                                 tcpClient.Connect(host, 80);
-                            
-                            
+
                                 writer = new StreamWriter(tcpClient.GetStream());
                                 reader = new StreamReader(tcpClient.GetStream());
                             
                                 CompileWriterRequest(writer, path);
                             
-                                string newResponse = reader.ReadToEnd();
+                                response = reader.ReadToEnd();
                             
-                                Console.Write(newResponse);
-                                int newFirst = newResponse.IndexOf("<body>");
-                                int newLast = newResponse.IndexOf("</body>");
-                            
-                                Console.WriteLine(newFirst);
-                                Console.WriteLine(newLast);
-                            
-                                string newBodySubstring = newResponse.Substring(newFirst+1, newLast - newFirst);
+                                pageTitle = ExtractTagFromWebPage(response, "<title>", "</title>");
             
-                                Dictionary<int, string> newLinksList = LinkExtractor.Extract(newBodySubstring);
+                                Console.WriteLine($"Page: {pageTitle}");
+                                
+                                bodyTag = ExtractTagFromWebPage(response, "body", "</body>");
+
+                                Dictionary<int, string> newLinksList = LinkExtractor.Extract(bodyTag);
 
                                 foreach (var link in newLinksList)
                                 {
@@ -115,6 +116,18 @@ namespace TinyBrowser
             }
         }
 
+        private static string ExtractTagFromWebPage(string pageContentString, string startTag, string endTag)
+        {
+            int startIndex = pageContentString.IndexOf(startTag);
+            int endIndex = pageContentString.IndexOf(endTag);
+
+            startIndex += startTag.Length;
+            
+            var tag = pageContentString[startIndex..endIndex];
+
+            return tag;
+        }
+        
         private static void CompileWriterRequest(StreamWriter writer, string path)
         {
             Console.WriteLine($"GET {path} HTTP/1.1");
