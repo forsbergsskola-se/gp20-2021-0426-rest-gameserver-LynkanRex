@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -84,6 +82,10 @@ namespace TinyBrowser
                             
                                 tcpClient.Close(); 
                                 tcpClient = new TcpClient();
+                                
+                                // TODO: Check if the first part after http:// or https:// matches the host, if not,
+                                // connect to the new website host and go from there (example: http://blank.org)
+                                
                                 tcpClient.Connect(host, 80);
 
                                 writer = new StreamWriter(tcpClient.GetStream());
@@ -153,6 +155,11 @@ namespace TinyBrowser
             {
                 foreach (Match match in regex.Matches(html))
                 {
+                    // TODO: Match for .js and other file extensions, and break out of this iteration if something like that is met,
+                    // we're only interested in website-based HyperText Links
+                    
+                    // TODO: Match for if the link contains the host value, and remove that part in that case
+
                     dictionary.Add(index, match.Groups[1].Value);
                     index++;
                 }
