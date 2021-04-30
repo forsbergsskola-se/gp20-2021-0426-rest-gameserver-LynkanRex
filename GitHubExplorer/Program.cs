@@ -52,35 +52,42 @@ namespace GitHubExplorer
             HttpClient.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("AppName", "1.0"));
             HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token",secret.token);
 
-            try
+            bool sessionActive = true;
+
+            while (true)
             {
-                Console.WriteLine("Welcome to the GitHub explorer. Please enter a username that you would like to have a look at:");
-                var username = Console.ReadLine();
-                
-                Console.WriteLine($"Attempting to access {HttpClient.BaseAddress}users/{username}");
-                
-                HttpResponseMessage response = await HttpClient.GetAsync($"users/{username}");
-
-                response.EnsureSuccessStatusCode();
-
-                string responseBody = await response.Content.ReadAsStringAsync();
-                
-                var splitStrings = responseBody.SplitString();
-
-                foreach (var entry in splitStrings)
+                try
                 {
-                    Console.WriteLine(entry);
+                    Console.WriteLine("Welcome to the GitHub explorer. Please enter a username that you would like to have a look at:\nOr enter \"Exit\" to close");
+                    var userChoice = Console.ReadLine();
+
+                    if (userChoice.ToLower() == "exit")
+                    {
+                        HttpClient.Dispose();
+                        break;
+                    }
+                    
+                    Console.WriteLine($"Attempting to access {HttpClient.BaseAddress}users/{userChoice}");
+                
+                    HttpResponseMessage response = await HttpClient.GetAsync($"users/{userChoice}");
+
+                    response.EnsureSuccessStatusCode();
+
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                
+                    var splitStrings = responseBody.SplitString();
+
+                    foreach (var entry in splitStrings)
+                    {
+                        Console.WriteLine(entry);
+                    }
                 }
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine("\nException caught!");
-                Console.WriteLine("\nMessage: {0} ", e.Message);
-                throw;
-            }
-            finally
-            {
-                HttpClient.Dispose();
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine("\nException caught!");
+                    Console.WriteLine("\nMessage: {0} ", e.Message);
+                    throw;
+                }
             }
         }
     }
