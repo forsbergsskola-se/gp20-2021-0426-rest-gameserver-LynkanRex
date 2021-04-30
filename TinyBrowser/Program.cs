@@ -38,7 +38,7 @@ namespace TinyBrowser
 
             var websiteURI = new UriBuilder(null, host);
             var pageTitle = ExtractTagFromWebPage(response, "<title>", "</title>");
-            var bodyTag = ExtractTagFromWebPage(response, "body", "</body>");
+            var bodyTag = ExtractTagFromWebPage(response, "<body>", "</body>");
             
             Console.WriteLine($"Connected to {websiteURI}");
             Console.WriteLine($"Page: {pageTitle}");
@@ -97,7 +97,7 @@ namespace TinyBrowser
             
                                 Console.WriteLine($"Page: {pageTitle}");
                                 
-                                bodyTag = ExtractTagFromWebPage(response, "body", "</body>");
+                                bodyTag = ExtractTagFromWebPage(response, "<body>", "</body>");
 
                                 Dictionary<int, string> newLinksList = LinkExtractor.Extract(bodyTag);
 
