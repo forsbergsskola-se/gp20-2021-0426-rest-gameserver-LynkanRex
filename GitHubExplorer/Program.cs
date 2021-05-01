@@ -44,11 +44,6 @@ namespace GitHubExplorer
             return splitString;
         }
 
-        private static void RunLoop()
-        {
-            
-        }
-
         static async Task Main(string[] args)
         {
             var secret = LoadAndValidateSecrets();
@@ -74,7 +69,8 @@ namespace GitHubExplorer
                     
                     if (userChoice.ToLower() == "users")
                     {
-                        // TODO: While-loop in choices as well to retain the user state, so they can look at other users and repos etc.
+                        // TODO: Needs to also send request to username/repos & username/orgs to get details from there.
+                        // TODO: Create classes that contains Properties that can be converted from the JSON in stead of doing string splits
                         Console.WriteLine("Please enter the name of the User that you'd like to look at");
                         var userName = Console.ReadLine();
 
