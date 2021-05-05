@@ -9,7 +9,7 @@ namespace GitHubExplorer
         //public bool isPrivate { get; set; }
         //public Owner owner { get; set; }
         public string html_url { get; set; }
-        //public string description { get; set; }
+        public string description { get; set; }
         //public bool fork { get; set; }
         //public string url { get; set; }
         //public string collaborators_url { get; set; }

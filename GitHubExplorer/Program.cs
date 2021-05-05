@@ -8,11 +8,6 @@ using System.Threading.Tasks;
 
 namespace GitHubExplorer
 {
-    class Secrets
-    {
-        public string token { get; set; }
-    }
-
     static class Program
     {
         private static readonly HttpClient HttpClient = new HttpClient();
@@ -48,28 +43,30 @@ namespace GitHubExplorer
         {
             return JsonSerializer.Deserialize<ReposResponse[]>(requestString);
         }
-
-        static async Task Main(string[] args)
+        
+        private static OrganizationResponse[] ConvertOrgRequestFromJSON(this string requestString)
         {
-            var secret = LoadAndValidateSecrets();
-            HttpClient.BaseAddress = new Uri("https://api.github.com");
+            return JsonSerializer.Deserialize<OrganizationResponse[]>(requestString);
+        }
         
-            HttpClient.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("AppName", "1.0"));
-            HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token",secret.token);
-        
-            Console.WriteLine("Welcome to the GitHub explorer.");
-        
+        private static OrganizationMembersResponse[] ConvertMembersRequestFromJSON(this string requestString)
+        {
+            return JsonSerializer.Deserialize<OrganizationMembersResponse[]>(requestString);
+        }
+
+        private static async Task DoProgramLoop()
+        {
             bool sessionActive = true;
-            
+
             while (sessionActive)
             {
                 try
                 {
                     // TODO: Needs to also send request to username/repos & username/orgs to get details from there.
-                    Console.WriteLine("Please enter the name of a Github User that you'd like to look at" + 
-                                          "\nYou can always enter 'Exit' to close");
+                    Console.WriteLine("Please enter the name of a Github User that you'd like to look at" +
+                                      "\nYou can always enter 'Exit' to close");
                     var userName = Console.ReadLine();
-                    
+
                     if (userName.ToLower() == "exit")
                     {
                         HttpClient.Dispose();
@@ -77,8 +74,22 @@ namespace GitHubExplorer
                         sessionActive = false;
                         break;
                     }
+
+                    HttpResponseMessage quickResponse = await HttpClient.GetAsync($"users/{userName}");
+
+                    quickResponse.EnsureSuccessStatusCode();
+
+                    string quickResponseBody = await quickResponse.Content.ReadAsStringAsync();
+
+                    UserResponse quickUserResponse = quickResponseBody.ConvertUserRequestFromJSON();
                     
-                    Console.WriteLine($"Would you like to 1: look at {userName}'s profile, or 2: look at their list of repositories?");
+                    Console.WriteLine($"{quickUserResponse.name} from {quickUserResponse.location}, working for {quickUserResponse.company}");
+
+                    Console.WriteLine(
+                        $"Would you like to \n" +
+                        $"1: view profile \n" +
+                        $"2: view repositories\n" +
+                        $"3: view organizations");
                     var choice = Console.ReadLine();
 
                     if (choice.ToLower() == "exit")
@@ -90,17 +101,15 @@ namespace GitHubExplorer
                     }
 
                     var choiceValue = Convert.ToInt32(choice);
-                    
+
                     if (choiceValue == 1)
                     {
-                        Console.WriteLine($"Attempting to get profile data for {userName}");
-                    
                         HttpResponseMessage response = await HttpClient.GetAsync($"users/{userName}");
-        
+
                         response.EnsureSuccessStatusCode();
-                    
+
                         string responseBody = await response.Content.ReadAsStringAsync();
-        
+
                         UserResponse userResponse = responseBody.ConvertUserRequestFromJSON();
                         
                         foreach (PropertyDescriptor entry in TypeDescriptor.GetProperties(userResponse))
@@ -112,25 +121,53 @@ namespace GitHubExplorer
                     }
                     else if (choiceValue == 2)
                     {
-                        Console.WriteLine($"Attempting to get repository data for {userName}");
-                        
                         HttpResponseMessage response = await HttpClient.GetAsync($"users/{userName}/repos");
-                        
-                        response.EnsureSuccessStatusCode();
-                        
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        
-                        ReposResponse[] reposResponse = responseBody.ConvertReposRequestFromJSON();
 
+                        response.EnsureSuccessStatusCode();
+
+                        string responseBody = await response.Content.ReadAsStringAsync();
+
+                        ReposResponse[] reposResponse = responseBody.ConvertReposRequestFromJSON();
+                        
+                        Console.WriteLine($"Repos for {userName}:");
                         foreach (var index in reposResponse)
                         {
-                            foreach (PropertyDescriptor entry in TypeDescriptor.GetProperties(index))
-                            {
-                                string name = entry.Name;
-                                object value = entry.GetValue(index);
-                                Console.WriteLine("{0}: {1}", name, value);
-                            } 
+                            
+                            Console.WriteLine($"{index.name} ({index.description})");
+                            Console.WriteLine($"{index.html_url}");
                             Console.WriteLine("");
+                        }
+                    }
+                    else if (choiceValue == 3)
+                    {
+                        HttpResponseMessage response = await HttpClient.GetAsync($"users/{userName}/orgs");
+
+                        response.EnsureSuccessStatusCode();
+
+                        string responseBody = await response.Content.ReadAsStringAsync();
+
+                        OrganizationResponse[] organizationResponse = responseBody.ConvertOrgRequestFromJSON();
+
+                        foreach (var index in organizationResponse)
+                        {
+                            Console.WriteLine($"{index.login} ({index.description})\n");
+                            Console.WriteLine($"Members: ");
+
+                            HttpResponseMessage membersResponse = await HttpClient.GetAsync($"orgs/{index.login}/members");
+
+                            membersResponse.EnsureSuccessStatusCode();
+
+                            string membersResponseBody = await membersResponse.Content.ReadAsStringAsync();
+
+                            OrganizationMembersResponse[] orgMemberList =
+                                membersResponseBody.ConvertMembersRequestFromJSON();
+                            
+                            foreach (var entry in orgMemberList)
+                            {
+                                Console.WriteLine(entry.login);
+                                Console.WriteLine(entry.html_url);
+                                Console.WriteLine("");
+                            }
                         }
                     }
                     else
@@ -145,6 +182,19 @@ namespace GitHubExplorer
                     throw;
                 }
             }
+        }
+        
+        static async Task Main(string[] args)
+        {
+            var secret = LoadAndValidateSecrets();
+            HttpClient.BaseAddress = new Uri("https://api.github.com");
+        
+            HttpClient.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("AppName", "1.0"));
+            HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token",secret.token);
+        
+            Console.WriteLine("Welcome to the GitHub explorer.");
+            
+            await DoProgramLoop();
         }
     }
 }
