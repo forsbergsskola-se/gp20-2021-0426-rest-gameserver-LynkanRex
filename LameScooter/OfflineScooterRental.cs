@@ -24,8 +24,7 @@ namespace LameScooter
             }
             else
             {
-                throw new SystemException($"Station named '{stationName}' not found, did you spell it right?\n+" +
-                                          $"Also, if you're looking for a two-word station name, remember to use quotation marks, \" \"! ");
+                throw new SystemException($"Station named '{stationName}' not found, did you spell it right?\n");
             }
             return 0;
         }

@@ -8,8 +8,10 @@ namespace LameScooter
 {
     public class DeprecatedLameScooterRental : ILameScooterRental
     {
-        public async Task<int> GetScooterCountInStation(string stationName)
+        async Task<int> IRental.GetScooterCountInStation(string stationName)
         {
+            Console.WriteLine("This is DEPRECATED, please consider using -offline or -online");
+            
             List<string> lines = new List<string>();
             var count = 0;
 
@@ -27,7 +29,7 @@ namespace LameScooter
             }
             
             if(lines.Count == 0)
-                throw new SystemException($"Station named '{stationName}' not found, did you spell it right?");
+                throw new SystemException($"Station named '{stationName}' not found, did you spell it right?\n");
             
             foreach (var foundLine in lines)
             {
