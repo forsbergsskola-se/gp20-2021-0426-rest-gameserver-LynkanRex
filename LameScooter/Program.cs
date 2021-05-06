@@ -11,7 +11,8 @@ namespace LameScooter
             if (args[0].Any(char.IsDigit))
                 throw new ArgumentException("Error: Station name cannot contain numbers!");    
             
-            ILameScooterRental rental = new OfflineScooterRental();
+            //ILameScooterRental rental = new OfflineScooterRental();
+            ILameScooterRental rental = new DeprecatedLameScooterRental();
 
             var count = await rental.GetScooterCountInStation(args[0]);
             Console.WriteLine("Number of scooters available at this station: " + count);

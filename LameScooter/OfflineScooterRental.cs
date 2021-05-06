@@ -9,6 +9,7 @@ namespace LameScooter
     {
         async Task<int> IRental.GetScooterCountInStation(string stationName)
         {
+            
             LameScooterStationList[] stationList = JsonSerializer.Deserialize<LameScooterStationList[]>(await File.ReadAllTextAsync("scooters.json"));
 
             if (stationList != null)
@@ -24,4 +25,14 @@ namespace LameScooter
             return 0;
         }
     }
+
+    // public class StationDataDeserializer
+    // {
+    //     public async Task<LameScooterStationList[]> DeserializeStationList(stationList)
+    //     {
+    //          
+    //
+    //         return JsonSerializer.Deserialize<LameScooterStationList[]>(await File.ReadAllTextAsync("scooters.json"));
+    //     }
+    // }
 }
