@@ -18,6 +18,7 @@ namespace LameScooter
                     {
                         return entry.bikesAvailable;
                     }
+                    throw new SystemException($"Station named '{stationName}' not found, did you spell it right?");
                 }
 
             return 0;
