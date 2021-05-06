@@ -11,17 +11,22 @@ namespace LameScooter
         {
             
             LameScooterStationList[] stationList = JsonSerializer.Deserialize<LameScooterStationList[]>(await File.ReadAllTextAsync("scooters.json"));
-
+            
             if (stationList != null)
+            {
                 foreach (var entry in stationList)
                 {
                     if (entry.name == stationName)
                     {
                         return entry.bikesAvailable;
-                    }
-                    throw new SystemException($"Station named '{stationName}' not found, did you spell it right?");
+                    } 
                 }
-
+            }
+            else
+            {
+                throw new SystemException($"Station named '{stationName}' not found, did you spell it right?\n+" +
+                                          $"Also, if you're looking for a two-word station name, remember to use quotation marks, \" \"! ");
+            }
             return 0;
         }
     }
