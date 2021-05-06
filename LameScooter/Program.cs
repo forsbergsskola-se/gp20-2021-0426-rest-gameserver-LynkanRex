@@ -8,13 +8,32 @@ namespace LameScooter
     {
         static async Task Main(string[] args)
         {
-            if (args[0].Any(char.IsDigit))
-                throw new ArgumentException("Error: Station name cannot contain numbers!");    
+            var count = 0;
             
-            //ILameScooterRental rental = new OfflineScooterRental();
-            ILameScooterRental rental = new DeprecatedLameScooterRental();
+            if (args[0].Any(char.IsDigit))
+                throw new ArgumentException("Error: Station name cannot contain numbers!");
 
-            var count = await rental.GetScooterCountInStation(args[0]);
+            if (args[1].ToLower() == "offline")
+            {
+                ILameScooterRental rental = new OfflineScooterRental();
+                count = await rental.GetScooterCountInStation(args[0]);
+            }
+            else if (args[1].ToLower() == "online")
+            {
+                throw new NotImplementedException("This option has not yet been implemented!");
+            }
+            else if (args[1].ToLower() == "deprecated")
+            {
+                ILameScooterRental rental = new DeprecatedLameScooterRental();
+                count = await rental.GetScooterCountInStation(args[0]);
+            }
+            else
+            {
+                throw new ArgumentException("Error: Incorrect parameter entry\n" +
+                                            "valid arguments are: offline, online or deprecated\n" +
+                                            "Also remember to use quotation marks, \"\", around the station name!\n");
+            }
+            
             Console.WriteLine("Number of scooters available at this station: " + count);
         }
     }
