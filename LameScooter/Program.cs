@@ -18,9 +18,10 @@ namespace LameScooter
                 ILameScooterRental rental = new OfflineScooterRental();
                 count = await rental.GetScooterCountInStation(args[0]);
             }
-            else if (args[1].ToLower() == "online")
+            else if (args[1].ToLower() == "realtime")
             {
-                throw new NotImplementedException("This option has not yet been implemented!");
+                ILameScooterRental rental = new RealTimeScooterRental();
+                count = await rental.GetScooterCountInStation(args[0]);
             }
             else if (args[1].ToLower() == "deprecated")
             {

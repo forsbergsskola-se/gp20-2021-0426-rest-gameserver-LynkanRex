@@ -7,7 +7,7 @@ namespace LameScooter
 {
     public class OfflineScooterRental : ILameScooterRental
     {
-        async Task<int> IRental.GetScooterCountInStation(string stationName)
+        public async Task<int> GetScooterCountInStation(string stationName)
         {
             
             LameScooterStationList[] stationList = JsonSerializer.Deserialize<LameScooterStationList[]>(await File.ReadAllTextAsync("scooters.json"));

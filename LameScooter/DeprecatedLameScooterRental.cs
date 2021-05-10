@@ -8,7 +8,7 @@ namespace LameScooter
 {
     public class DeprecatedLameScooterRental : ILameScooterRental
     {
-        async Task<int> IRental.GetScooterCountInStation(string stationName)
+        public async Task<int> GetScooterCountInStation(string stationName)
         {
             Console.WriteLine("This is DEPRECATED, please consider using -offline or -online");
             
