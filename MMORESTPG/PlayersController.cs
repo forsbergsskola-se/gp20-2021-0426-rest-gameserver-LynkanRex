@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MMORESTPG
 {
-    public class PlayersController : IRepository
+    public class PlayersController
     {
         private IRepository repository;
         
@@ -19,8 +19,6 @@ namespace MMORESTPG
         {
             return new Player[0];
         }
-
-        public Task<Player> Create(Player player) => throw new NotImplementedException();
 
         public async Task<Player> Create(NewPlayer player)
         {
